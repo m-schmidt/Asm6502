@@ -4,10 +4,17 @@ module Arch6502
   , isBranch
   , isShiftRotate
   , AddressingMode(..)
-  , opCode
+  , encodeInstruction
+  , encodeOperand
+  , operandLength
+  , isIllegalInstruction
   )
 
 where
+
+import Data.Bits
+import Data.Word
+
 
 -- 6502 Mnemonics
 data Mnemonic = ADC   -- add with carry
@@ -101,8 +108,40 @@ data AddressingMode = Absolute          -- $A5B6
                     deriving (Eq,Ord,Enum,Show)
 
 
+-- Encode a mnemonic with an operand of a specific addressing mode into a sequence of bytes
+encodeInstruction :: Int -> Mnemonic -> AddressingMode -> Int -> Maybe [Word8]
+encodeInstruction pc mnemonic mode value =
+
+  -- convert target address into relative distance for branches
+  let value' = if mode == Relative
+                 then value - pc - 2
+                 else value in
+
+  -- encoding is the instruction opcode followed by a stream of bytes for the operand
+  case opCode mnemonic mode of
+    Just code -> Just $ code : encodeOperand (operandLength mode) value'
+    _         -> Nothing
+
+
+-- Encode the least significant bytes of an integer value into a little endian sequence of bytes
+encodeOperand :: Int -> Int -> [Word8]
+encodeOperand 0 _ = []
+encodeOperand n v = (fromIntegral $ v .&. 255) : encodeOperand (n-1) (v `shift` (-8))
+
+
+-- Returns the number of bytes needed to encode an addressing mode
+operandLength :: AddressingMode -> Int
+operandLength mode = case mode of
+  Accumulator -> 0
+  Implied     -> 0
+  Absolute    -> 2
+  AbsoluteX   -> 2
+  AbsoluteY   -> 2
+  _           -> 1
+
+
 -- Returns the opcode for a combination of instruction mnemonic and addressing mode
-opCode :: Mnemonic -> AddressingMode -> Maybe Int
+opCode :: Mnemonic -> AddressingMode -> Maybe Word8
 opCode mnemonic mode = opcode mode mnemonic
   where
     opcode m = case m of
@@ -309,3 +348,8 @@ opCode mnemonic mode = opcode mode mnemonic
       LDX -> Just 0xb6
       STX -> Just 0x96
       _   -> Nothing
+
+
+-- Check whether a combination of mnemonic and addressing mode is illegal
+isIllegalInstruction :: Mnemonic -> AddressingMode -> Bool
+isIllegalInstruction mnemonic mode = opCode mnemonic mode == Nothing
