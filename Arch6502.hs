@@ -110,11 +110,11 @@ data AddressingMode = Absolute          -- $A5B6
 
 -- Encode a mnemonic with an operand of a specific addressing mode into a sequence of bytes
 encodeInstruction :: Int -> Mnemonic -> AddressingMode -> Int -> Maybe [Word8]
-encodeInstruction pc mnemonic mode value =
+encodeInstruction addr mnemonic mode value =
 
   -- convert target address into relative distance for branches
   let value' = if mode == Relative
-                 then value - pc - 2
+                 then value - addr - 2
                  else value in
 
   -- encoding is the instruction opcode followed by a stream of bytes for the operand

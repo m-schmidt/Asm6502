@@ -67,7 +67,7 @@ main = do
   when (excess > 0) $ exitWithError $ "Error: program exceeds available address space by " ++ show excess ++ " bytes.\n"
 
   -- Write symboltable for debugging
-  when (optShowSymtab opts) $ report $ formattedList "Resolved Symbols:\n" $ describeSymbolTable table_resolved
+  when (optShowSymtab opts) $ report $ formattedList "Resolved symbols:\n" $ describeSymbolTable table_resolved
 
   -- Write output file
   let writer = case (optFormat opts) of

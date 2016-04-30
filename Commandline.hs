@@ -89,7 +89,6 @@ commandLineOptions argv =
       let opts' = case optOutput opts of
                     "" -> opts { optOutput = replaceExtension file $ map toLower $ show $ optFormat opts }
                     _  -> opts
-
       return (opts', file)
 
       where
