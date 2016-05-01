@@ -180,8 +180,8 @@ overlongBranches :: [Chunk] -> [String]
 overlongBranches = concat . map (optmapChunk check)
   where
     check addr (Instruction m (Operand Relative (Constant target))) =
-      case addr + 2 - target of
-        d | d < -127 || d > 128 -> Just $ (show m) ++ " from " ++ (printf "$%04x" addr) ++ " to " ++ (printf "$%04x" target) ++ (printf ", distance is %d bytes" d)
+      case target - addr - 2 of
+        d | d < -127 || d > 128 -> Just $ printf "%s from $%04x to $%04x, distance is %d bytes" (show m) addr target d
         _                       -> Nothing
 
     check _ _ = Nothing
