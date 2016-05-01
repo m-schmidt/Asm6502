@@ -207,7 +207,7 @@ opCode mnemonic mode = opcode mode mnemonic
       ADC -> Just 0x79
       AND -> Just 0x39
       CMP -> Just 0xd9
-      EOR -> Just 0x56
+      EOR -> Just 0x59
       LDA -> Just 0xb9
       LDX -> Just 0xbe
       ORA -> Just 0x19
