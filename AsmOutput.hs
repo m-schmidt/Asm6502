@@ -64,7 +64,7 @@ writeParsed chunks filename = writeFile filename . unlines . map writeChunk $ ch
     writeValue v = case v of
       Constant c -> writeHexConst c
       Symbol s 0 -> s
-      Symbol s o -> s ++ (show o)
+      Symbol s o -> s ++ (printf "%+d" o)
 
     writeHexConst n =
       if n < 256
