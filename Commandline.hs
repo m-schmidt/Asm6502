@@ -73,7 +73,7 @@ options =
   , Option ['f']
       ["format"]
       (ReqArg (\s opts -> opts { optFormatRaw = s }) "FORMAT")
-      ("Set output format to 'PRG' or 'HEX'. Defaults to'" ++ show (optFormat defaultOptions) ++ "'.")
+      ("Set output format to 'PRG' or 'HEX'. Defaults to '" ++ show (optFormat defaultOptions) ++ "'.")
   ]
 
 
