@@ -74,7 +74,7 @@ Asm6502 supports the following directives:
     > BYTE $a5
 
  * `WORD Wordvalue`
-    Put a single word value (16 bits) to the assembler output. Example:
+    Put a single word value (16 bits) to the assembler output. Encoding is little endian. Example:
     > WORD $a5b6
 
  * `INCLUDE-PRG "filename"`

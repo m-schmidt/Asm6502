@@ -123,7 +123,7 @@ encodeInstruction addr mnemonic mode value =
     _         -> Nothing
 
 
--- Encode the least significant bytes of an integer value into a little endian sequence of bytes
+-- Encode an integer value into a little endian sequence of bytes
 encodeOperand :: Int -> Int -> [Word8]
 encodeOperand 0 _ = []
 encodeOperand n v = (fromIntegral $ v .&. 255) : encodeOperand (n-1) (v `shift` (-8))
