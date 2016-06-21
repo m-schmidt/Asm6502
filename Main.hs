@@ -19,7 +19,7 @@ main :: IO ()
 main = do
 
   -- Parse command line and input program
-  (opts,filename) <- getArgs >>= commandLineOptions
+  (opts,filename) <- getArgs >>= resolveAtFiles >>= commandLineOptions
   p <- catchIO parseAssembler filename
 
   -- Check for common errors
@@ -85,6 +85,14 @@ catchIO action path = catchIOError (action path) handler
       | isDoesNotExistError e = exitWithError $ "Error: reading file '" ++ path ++ "' failed since it doesn't exist."
       | isPermissionError e   = exitWithError $ "Error: permission to access file '" ++ path ++ "' denied."
       | otherwise             = exitWithError $ "Error: unknown error while accessing file '" ++ path ++ "'."
+
+
+-- Incorporate contents of '@file' linewise into the command line arguments
+resolveAtFiles :: [String] -> IO [String]
+resolveAtFiles = fmap (filter (/=[]) . concat) . mapM resolveAtFile
+  where
+    resolveAtFile ('@':path) = lines <$> catchIO readFile path
+    resolveAtFile s = return [s]
 
 
 -- Replace include statements with data contents of referenced files
