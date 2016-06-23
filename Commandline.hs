@@ -39,7 +39,7 @@ defaultOptions :: Options
 defaultOptions     = Options
   { optDumpParsed  = False
   , optFormat      = PRG
-  , optFormatRaw   = []
+  , optFormatRaw   = ""
   , optOutput      = ""
   , optShowHelp    = False
   , optShowSymtab  = False
@@ -84,12 +84,9 @@ commandLineOptions argv =
     (o,n,[]) -> do
       when (optShowHelp o') showHelp
       when (optShowVersion o') showVersion
-      opts <- handleOutputFormat o'
       file <- handleInputFile n
-      let opts' = case optOutput opts of
-                    "" -> opts { optOutput = replaceExtension file $ map toLower $ show $ optFormat opts }
-                    _  -> opts
-      return (opts', file)
+      opts <- handleOutputFormat o' >>= handleOutputFile file
+      return (opts, file)
 
       where
         o' = foldl (flip id) defaultOptions o
@@ -112,23 +109,32 @@ showVersion :: IO ()
 showVersion = exitWithInfo "Asm6502 version 1"
 
 
--- Check for a valid output format specification
-handleOutputFormat :: Options -> IO Options
-handleOutputFormat opts = do
-  if formatRaw == [] then
-    return opts
-  else
-    case readMaybe $ map toUpper formatRaw of
-      Just f  -> return opts { optFormat = f }
-      Nothing -> exitWithError $ "Error: illegal output format '" ++ formatRaw ++ "'"
-
-  where
-    formatRaw = optFormatRaw opts
-
-
 -- Check for a single input file
 handleInputFile :: [String] -> IO String
 handleInputFile files = do
   case files of
     f:[] -> return $ makeValid f
     _    -> exitWithError "Error: please specify exactly one input file"
+
+
+-- Check for a valid output format specification
+handleOutputFormat :: Options -> IO Options
+handleOutputFormat opts = do
+  if format == "" then
+    return opts
+  else
+    case readMaybe $ map toUpper format of
+      Just f  -> return opts { optFormat = f }
+      Nothing -> exitWithError $ "Error: illegal output format '" ++ format ++ "'"
+
+  where
+    format = optFormatRaw opts
+
+
+-- Check for name of output file, generate one from input file if missing
+handleOutputFile :: FilePath -> Options -> IO Options
+handleOutputFile file opts = do
+  if optOutput opts == "" then
+    return opts { optOutput = replaceExtension file $ map toLower $ show $ optFormat opts }
+  else
+    return opts
