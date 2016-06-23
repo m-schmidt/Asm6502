@@ -2,15 +2,15 @@ module Main
 
 where
 
-import AsmParser
 import AsmOutput
+import AsmParser
 import Assembler
 import Commandline
 import Control.Monad
 import Error
-import System.IO.Error
 import System.Environment
 import System.FilePath
+import System.IO.Error
 import qualified Data.ByteString as B (readFile, unpack)
 import qualified Data.Set as Set
 
@@ -89,7 +89,7 @@ catchIO action path = catchIOError (action path) handler
 
 -- Incorporate contents of '@file' linewise into the command line arguments
 resolveAtFiles :: [String] -> IO [String]
-resolveAtFiles = fmap (filter (/=[]) . concat) . mapM resolveAtFile
+resolveAtFiles = fmap (filter (/= []) . concat) . mapM resolveAtFile
   where
     resolveAtFile ('@':path) = lines <$> catchIO readFile path
     resolveAtFile s = return [s]
