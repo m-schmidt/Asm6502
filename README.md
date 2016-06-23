@@ -29,6 +29,23 @@ Possible options are:
  *  `-f FORMAT` or `--format=FORMAT`
     Set the output format of the assembler to either `PRG` (a simple binary format) or `HEX` (a hexdump). If not specified, the default output format is `PRG`.
 
+### @file Support
+
+Before parsing the commandline, any argument starting with an `@` symbol is interpreted as a file path. The argument on the command line is replaced with the contents of this file - each line as a new argument. Note, that there is no recursive replacement. For example, assume a file named `afile` with the following content:
+
+    -f
+    HEX
+    -d
+    input.asm
+
+Then a commandline like:
+
+> asm6502 @/path/to/afile
+
+will be transformed to:
+
+> asm6502 -f HEX -d input.asm
+
 
 ## Supported Assembler Directives
 
