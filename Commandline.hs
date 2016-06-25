@@ -119,22 +119,19 @@ handleInputFile files = do
 
 -- Check for a valid output format specification
 handleOutputFormat :: Options -> IO Options
-handleOutputFormat opts = do
-  if format == "" then
-    return opts
-  else
-    case readMaybe $ map toUpper format of
-      Just f  -> return opts { optFormat = f }
-      Nothing -> exitWithError $ "Error: illegal output format '" ++ format ++ "'"
-
+handleOutputFormat opts
+  | null format = return opts
+  | otherwise   = case readMaybe format of
+                    Just f  -> return opts { optFormat = f }
+                    Nothing -> exitWithError $ "Error: illegal output format '" ++ format ++ "'"
   where
-    format = optFormatRaw opts
+    format = map toUpper $ optFormatRaw opts
 
 
 -- Check for name of output file, generate one from input file if missing
 handleOutputFile :: FilePath -> Options -> IO Options
-handleOutputFile file opts = do
-  if optOutput opts == "" then
-    return opts { optOutput = replaceExtension file $ map toLower $ show $ optFormat opts }
-  else
-    return opts
+handleOutputFile file opts
+  | null output = return opts { optOutput = replaceExtension file $ map toLower $ show $ optFormat opts }
+  | otherwise   = return opts
+  where
+    output = optOutput opts
