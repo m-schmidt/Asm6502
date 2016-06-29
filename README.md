@@ -36,15 +36,17 @@ Before parsing the commandline, any argument starting with an `@` symbol is inte
     -f
     HEX
     -d
-    input.asm
+    -o
+    out.hex
 
 Then a commandline like:
 
-> asm6502 @/path/to/afile
+> asm6502 @/path/to/afile input.asm
+
 
 will be transformed to:
 
-> asm6502 -f HEX -d input.asm
+> asm6502 -f HEX -d -o out.hex input.asm
 
 
 ## Supported Assembler Directives
@@ -55,20 +57,16 @@ Asm6502 supports the following directives:
     Defines a symbolic `Name` as an alias for a constant value. Example:
     > VSCRBASE EQU $7000
 
-
  * `ORG Constant`
     Defines the target address where Asm6502 will continue assembling its output to. Example:
     > ORG $2000
 
-
  * `Labelname:`
     Define a new label.
-
 
  * `HEXDATA <list of hexadecimal values>`
     The list of hexadecimal values is not modified and forwarded to the assembler output at the current address. Example:
     > HEXDATA $30 $31 $32 $33 $34 $35 $36 $37
-
 
  * `STRING "stringliteral"`
     Like `HEXDATA` the given ASCII string is directly forwarded to the assembler output at the current address. Example:
