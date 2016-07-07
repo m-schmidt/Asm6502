@@ -29,7 +29,7 @@ data Statement = Data Int [Value]
 data Operand = Operand AddressingMode Value
              deriving (Eq,Show)
 
--- Constant or symbolic values
+-- Constant values or symbolic values with constant offset
 data Value = Constant Int
            | Symbol String Int
            deriving (Eq,Show)
