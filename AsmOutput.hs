@@ -1,10 +1,4 @@
-module AsmOutput
-  ( writePRG
-  , writeHEX
-  , writeParsed
-  )
-
-where
+module AsmOutput where
 
 import Arch6502
 import AsmParser

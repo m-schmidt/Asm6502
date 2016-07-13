@@ -1,24 +1,4 @@
-module Assembler
-  ( Duplicates
-  , SymbolTable
-  , symbolTable
-  , describeSymbolTable
-  , undefinedSymbols
-  , unusedSymbols
-  , illegalInstructions
-  , stripUnused
-  , sortedChunks
-  , Chunk(..)
-  , resolveLabels
-  , resolveReferences
-  , overlongBranches
-  , AsmChunk(..)
-  , assemble
-  , overlappingParts
-  , merge
-  )
-
-where
+module Assembler where
 
 import AsmParser
 import Arch6502

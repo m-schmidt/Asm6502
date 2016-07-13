@@ -1,16 +1,4 @@
-module Arch6502
-  ( Mnemonic(..)
-  , allMnemonics
-  , isBranch
-  , isShiftRotate
-  , AddressingMode(..)
-  , encodeInstruction
-  , encodeOperand
-  , operandLength
-  , isIllegalInstruction
-  )
-
-where
+module Arch6502 where
 
 import Data.Bits
 import Data.Word
@@ -119,7 +107,6 @@ encodeInstruction addr mnemonic mode value =
   where
     -- convert target address into relative distance for branches
     value' = if mode == Relative then value - addr - 2 else value
-
 
 
 -- Encode an integer value into a little endian sequence of bytes

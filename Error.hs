@@ -1,11 +1,4 @@
-module Error
-  ( report
-  , exitWithInfo
-  , exitWithError
-  , formattedList
-  )
-
-where
+module Error where
 
 import Data.List
 import System.Exit
