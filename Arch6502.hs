@@ -61,7 +61,7 @@ data Mnemonic = ADC   -- add with carry
               | TXA   -- transfer X to accumulator
               | TXS   -- transfer X to stack pointer
               | TYA   -- transfer Y to accumulator
-              deriving (Eq,Ord,Enum,Bounded,Show,Read)
+              deriving (Eq,Enum,Bounded,Show,Read)
 
 
 -- List of all 6502 Mnemonics
@@ -93,7 +93,7 @@ data AddressingMode = Absolute          -- $A5B6
                     | ZeroPage          -- $A5
                     | ZeroPageX         -- $A5,X
                     | ZeroPageY         -- $A5,Y
-                    deriving (Eq,Ord,Enum,Show)
+                    deriving (Eq,Enum,Show)
 
 
 -- Encode a mnemonic with an operand of a specific addressing mode into a sequence of bytes
