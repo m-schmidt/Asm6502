@@ -9,7 +9,7 @@ import System.IO
 report :: String -> IO ()
 report message = hPutStrLn stderr message
 
--- Report info/error messages and terminate the programm
+-- Report info/error messages and terminate the program
 exitWithInfo :: String -> IO a
 exitWithInfo message = do report message; exitWith ExitSuccess
 
