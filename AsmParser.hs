@@ -1,3 +1,4 @@
+-- |Parser module for 6502 assembly files
 module AsmParser
   ( Statement(..)
   , Value(..)
@@ -16,32 +17,32 @@ import Text.Parsec.Char
 import Text.ParserCombinators.Parsec
 
 
--- Statements for assembly programs
-data Statement = Data Int [Value]
-               | Equ String Value
-               | Include String
-               | Instruction Mnemonic Operand
-               | Label String
-               | Org Value
+-- |Statements for assembly programs
+data Statement = Data Int [Value]                -- ^ Data definitions
+               | Equ String Value                -- ^ Defines a symbolic name as alias for a constant value
+               | Include String                  -- ^ Insert data from referenced file into assembler output
+               | Instruction Mnemonic Operand    -- ^ A 6502 instruction with operand
+               | Label String                    -- ^ Define a new label
+               | Org Value                       -- ^ Defines the target address assembling will write its output
                deriving (Eq,Show)
 
--- Instruction operands
+-- |Instruction operands bundle an addressing mode and a value
 data Operand = Operand AddressingMode Value
              deriving (Eq,Show)
 
--- Constant values or symbolic values with constant offset
-data Value = Constant Int
-           | Symbol String Int
+-- |Constant values or symbolic values with constant offset
+data Value = Constant Int        -- ^ Immediate constants
+           | Symbol String Int   -- ^ Symbolic references with constant byte-offset
            deriving (Eq,Show)
 
 
--- The main parser function
+-- |The main parser function
 parseAssembler :: String -> IO [Statement]
 parseAssembler filename =
   parseFromFile asmProgram filename >>= either (exitWithError . ("Error: "++) . show) return
 
 
--- Parser for assembler programs
+-- |Parser for assembler programs
 asmProgram :: Parser [Statement]
 asmProgram = do
   p <- endBy (whiteSpace *> line) endOfLine <* eof
@@ -54,7 +55,7 @@ asmProgram = do
       return $ l++s
 
 
--- Parser for assembler labels
+-- |Parser for assembler labels
 asmLabels :: Parser [Statement]
 asmLabels = many (try oneLabel)
   where
@@ -64,7 +65,7 @@ asmLabels = many (try oneLabel)
       return $ Label (map toLower l)
 
 
--- Parser for assembler statements which may be directives or instructions
+-- |Parser for assembler statements which may be directives or instructions
 asmStatement :: Parser [Statement]
 asmStatement =   try equ
              <|> try org
@@ -128,7 +129,7 @@ asmStatement =   try equ
                  | otherwise                                = p
 
 
--- Parser for instruction mnemonics
+-- |Parser for instruction mnemonics
 asmMnemonic :: Parser Mnemonic
 asmMnemonic = do w <- try (lexeme asmMnemonic') <?> "instruction mnemonic"
                  return $ read $ map toUpper w
@@ -136,7 +137,7 @@ asmMnemonic = do w <- try (lexeme asmMnemonic') <?> "instruction mnemonic"
     asmMnemonic' = (choice $ map (caseString . show) allMnemonics) <* notFollowedBy identLetter
 
 
--- Parser for instruction operands with constant or symbolic offsets for all addressing modes
+-- |Parser for instruction operands with constant or symbolic offsets for all addressing modes
 asmOperand :: Parser Operand
 asmOperand =   try accumulator
            <|> try absoluteX
@@ -187,7 +188,7 @@ asmOperand =   try accumulator
                  | otherwise                = False
 
 
--- Parser for binary, octal, decimal, or hexadecimal values
+-- |Parser for binary, octal, decimal, or hexadecimal values
 asmValue :: Parser Value
 asmValue =   try binValue
          <|> try octValue
@@ -212,7 +213,7 @@ asmValue =   try binValue
       return $ Constant $ fromBase 16 v
 
 
--- Parser for binary, octal, decimal, or hexadecimal values or symbols
+-- |Parser for binary, octal, decimal, or hexadecimal values or symbols
 asmValueOrSymbol :: Parser Value
 asmValueOrSymbol =   try asmValue
                  <|> symbol
@@ -229,17 +230,17 @@ asmValueOrSymbol =   try asmValue
       return $ if s=='+' then o else -o
 
 
--- Convert digit strings of a given base to an integer value.
+-- |Convert digit strings of a given base to an integer value.
 fromBase :: Int -> String -> Int
 fromBase b = fst . head . readInt b ((<b) . digitToInt) digitToInt
 
 
--- Parser for line based comments
+-- |Parser for line based comments
 comment :: Parser ()
 comment = char ';' *> (skipMany $ noneOf "\r\n")
 
 
--- Parser for identifiers
+-- |Parser for identifiers
 identStart :: Parser Char
 identStart = letter <|> char '_' <?> ""
 
@@ -253,21 +254,21 @@ identifier = do
   return $ p:q
 
 
--- Parser for string literals
+-- |Parser for string literals
 stringLiteral :: Parser String
 stringLiteral = between (char '"') (char '"') (many $ noneOf "\"\n\r")
 
 
--- Parser for case insensitive strings
+-- |Parser for case insensitive strings
 caseString :: String -> Parser String
 caseString s = try (mapM (\c -> char (toLower c) <|> char (toUpper c)) s)
 
 
--- Parser that skips any whitespace except newline characters
+-- |Parser that skips any whitespace except newline characters
 whiteSpace :: Parser ()
 whiteSpace = skipMany $ oneOf " \t\v"
 
 
--- Parser generator that applies a parser and the whiteSpace parser after that
+-- |Parser generator that applies a parser and the whiteSpace parser after that
 lexeme :: Parser a -> Parser a
 lexeme p = p <* whiteSpace

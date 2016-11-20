@@ -1,4 +1,5 @@
-module Main (main) where
+-- |Assembler for the MOS Technology 6502
+module Main where
 
 import AsmOutput
 import AsmParser
@@ -75,7 +76,7 @@ main = do
   catchIO (writer p_final) $ optOutput opts
 
 
--- Handle IO exceptions when reading input files
+-- |Wrapper around catchIOError that prints error messages and terminates the program on error
 catchIO :: (FilePath -> IO a) -> FilePath -> IO a
 catchIO action path = catchIOError (action path) handler
   where
@@ -85,7 +86,7 @@ catchIO action path = catchIOError (action path) handler
       | otherwise             = exitWithError $ "Error: unknown error while accessing file '" ++ path ++ "'."
 
 
--- Incorporate contents of '@file' linewise into the command line arguments
+-- |Incorporate contents of '@file' linewise into the command line arguments
 resolveAtFiles :: [String] -> IO [String]
 resolveAtFiles = fmap (filter (/= []) . concat) . mapM resolveAtFile
   where
@@ -93,7 +94,7 @@ resolveAtFiles = fmap (filter (/= []) . concat) . mapM resolveAtFile
     resolveAtFile s = return [s]
 
 
--- Replace include statements with data contents of referenced files
+-- |Replace include statements with data contained in referenced files
 resolveIncludes :: FilePath -> [Chunk] -> IO [Chunk]
 resolveIncludes p = mapM (\(Chunk a ss) -> mapM resolve ss >>= return . (Chunk a))
   where
@@ -102,6 +103,6 @@ resolveIncludes p = mapM (\(Chunk a ss) -> mapM resolve ss >>= return . (Chunk a
       _         -> return st
 
 
--- Add a further extension in front of the already existing extensions of a filepath
+-- |Add a further extension in front of the already existing extensions of a filepath
 prependExtension :: FilePath -> String -> FilePath
 prependExtension path ext = (dropExtensions path) <.> ext <.> (takeExtensions path)

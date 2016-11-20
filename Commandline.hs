@@ -1,3 +1,4 @@
+-- |Module to parse the command line
 module Commandline
   ( OutFormat(..)
   , Options(..)
@@ -15,26 +16,26 @@ import System.FilePath
 import Text.Read
 
 
--- Supported output formats
+-- |Supported output formats
 data OutFormat
-  = PRG             -- A binary format directly loadable by an emulator
-  | HEX             -- A textual hexdump
+  = PRG             -- ^ A binary format directly loadable by an emulator
+  | HEX             -- ^ A textual hexdump
   deriving (Eq,Show,Read)
 
 
--- Command line options of the assembler
+-- |Command line options of the assembler
 data Options = Options
-  { optDumpParsed  :: Bool
-  , optFormat      :: OutFormat
-  , optFormatRaw   :: String
-  , optOutput      :: FilePath
-  , optShowHelp    :: Bool
-  , optShowSymtab  :: Bool
-  , optShowVersion :: Bool
+  { optDumpParsed  :: Bool        -- ^ Tracing: dump parsed input program
+  , optFormat      :: OutFormat   -- ^ Parsed output format
+  , optFormatRaw   :: String      -- ^ Raw output format as specified on command line
+  , optOutput      :: FilePath    -- ^ The output file
+  , optShowHelp    :: Bool        -- ^ Show help and terminate program
+  , optShowSymtab  :: Bool        -- ^ Tracing: print all symbols with their resolved addresses
+  , optShowVersion :: Bool        -- ^ Show version information and terminate program
   } deriving (Eq,Show)
 
 
--- Default values for command line options
+-- |Default values for command line options
 defaultOptions :: Options
 defaultOptions     = Options
   { optDumpParsed  = False
@@ -47,7 +48,7 @@ defaultOptions     = Options
   }
 
 
--- Option descriptions for GetOpt module
+-- |Option descriptions for GetOpt module
 options :: [OptDescr (Options -> Options)]
 options =
   [ Option ['h','?']
@@ -77,7 +78,7 @@ options =
   ]
 
 
--- Command line handling
+-- |Command line handling
 commandLineOptions :: [String] -> IO (Options, String)
 commandLineOptions argv =
   case getOpt Permute options argv of
@@ -94,22 +95,22 @@ commandLineOptions argv =
     (_,_,errs) -> exitWithError $ concat (map ("Error: "++) $ nub errs) ++ usageInfo header options
 
 
--- Header message for usage info
+-- |Header message for usage info
 header :: String
 header = "Synopsis: asm6502 [options] <input file>"
 
 
--- Show help and exit programm
+-- |Show help and exit programm
 showHelp :: IO ()
 showHelp = exitWithInfo (usageInfo header options)
 
 
--- Show version info and exit programm
+-- |Show version info and exit programm
 showVersion :: IO ()
 showVersion = exitWithInfo "Asm6502 version 1"
 
 
--- Check for a single input file
+-- |Check for a single input file
 handleInputFile :: [String] -> IO String
 handleInputFile files = do
   case files of
@@ -117,7 +118,7 @@ handleInputFile files = do
     _    -> exitWithError "Error: please specify exactly one input file"
 
 
--- Check for a valid output format specification
+-- |Check for a valid output format specification
 handleOutputFormat :: Options -> IO Options
 handleOutputFormat opts
   | null format = return opts
@@ -128,7 +129,7 @@ handleOutputFormat opts
     format = map toUpper $ optFormatRaw opts
 
 
--- Check for name of output file, generate one from input file if missing
+-- |Check for name of output file, generate one from input file if missing
 handleOutputFile :: FilePath -> Options -> IO Options
 handleOutputFile file opts
   | null output = return opts { optOutput = replaceExtension file $ map toLower $ show $ optFormat opts }

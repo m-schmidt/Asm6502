@@ -1,3 +1,4 @@
+-- |Assembling instructions into bute sequences
 module Assembler where
 
 import AsmParser
@@ -11,10 +12,14 @@ import qualified Data.Set as Set
 import Text.Printf
 
 
--- Computes a tuple containing all duplicate symbols and a table mapping symbols to their addresses
-type Duplicates  = Set String
+-- |A symboltable maps symbols to their eventually resolved addresses
 type SymbolTable = Map String (Maybe Int)
 
+-- |Sets of duplicate symbols
+type Duplicates  = Set String
+
+
+-- |Computes a tuple containing all duplicate symbols and a table mapping symbols to their addresses
 symbolTable :: [Statement] -> (Duplicates, SymbolTable)
 symbolTable = foldr accumulate (Set.empty, Map.empty) . concat . map definitions
   where
@@ -31,7 +36,7 @@ symbolTable = foldr accumulate (Set.empty, Map.empty) . concat . map definitions
       _                  -> []
 
 
--- Convert a symbol table into a list of strings describing all resolved symbols
+-- |Convert a symbol table into a list of strings describing all resolved symbols
 describeSymbolTable :: SymbolTable -> [String]
 describeSymbolTable = Map.foldrWithKey describeSymbol []
   where
@@ -39,7 +44,7 @@ describeSymbolTable = Map.foldrWithKey describeSymbol []
     describeSymbol _ _ acc             = acc
 
 
--- Computes a set of referenced symbols
+-- |Computes a set of referenced symbols
 referencedSymbols :: [Statement] -> Set String
 referencedSymbols = Set.fromList . concat . map references
   where
@@ -50,17 +55,17 @@ referencedSymbols = Set.fromList . concat . map references
       _                                      -> []
 
 
--- Computes a set of undefined symbols
+-- |Computes a set of undefined symbols
 undefinedSymbols :: SymbolTable -> [Statement] -> Set String
 undefinedSymbols t = Set.filter (\s -> not $ Map.member s t) . referencedSymbols
 
 
--- Computes a set of unused symbols
+-- |Computes a set of unused symbols
 unusedSymbols :: SymbolTable -> [Statement] -> Set String
 unusedSymbols t stmts = Set.filter (\s -> Set.notMember s $ referencedSymbols stmts) $ Map.keysSet t
 
 
--- Computes a list of illegal instruction/addressingmode combinations in the programm
+-- |Computes a list of illegal instruction/addressingmode combinations in the programm
 illegalInstructions :: [Statement] -> [String]
 illegalInstructions = nub . foldr illegal [] . concat . map instructions
   where
@@ -76,7 +81,7 @@ illegalInstructions = nub . foldr illegal [] . concat . map instructions
       _                           -> []
 
 
--- Remove unused symbol definitions from a program
+-- |Remove unused symbol definitions from a program
 stripUnused :: Set String -> [Statement] -> [Statement]
 stripUnused unused = filter uselessDefinition
   where
@@ -86,14 +91,15 @@ stripUnused unused = filter uselessDefinition
       _       -> True
 
 
--- A chunk is portion of a program consisting of a start address and a list of statements
+-- |A chunk is portion of a program consisting of a start address and a list of statements
 data Chunk = Chunk Int [Statement] deriving (Eq,Show)
 
+-- |Chunks are sorted according their start address
 instance Ord Chunk where
   (Chunk i1 _) `compare` (Chunk i2 _) = i1 `compare` i2
 
 
--- Split a program into a list of chunks sorted by ascending start address
+-- |Split a program into a list of chunks sorted by ascending start address
 sortedChunks :: [Statement] -> [Chunk]
 sortedChunks = sort . chunks . (:) (Org $ Constant 0)
   where
@@ -108,7 +114,7 @@ sortedChunks = sort . chunks . (:) (Org $ Constant 0)
     isOrg _       = False
 
 
--- Map a function over the instructions of a chunk while also providing the correct pc for each address
+-- |Map a function over the instructions of a chunk while also providing the correct pc for each address
 optmapChunk :: (Int -> Statement -> Maybe a) -> Chunk -> [a]
 optmapChunk f (Chunk address statements) =  fst $ foldl' mapStatement ([], address) statements
   where
@@ -125,7 +131,7 @@ optmapChunk f (Chunk address statements) =  fst $ foldl' mapStatement ([], addre
       _                             -> 0
 
 
--- Computes an updated symboltable that contains resolved addresses for all labels
+-- |Computes an updated symboltable that contains resolved addresses for all labels
 resolveLabels :: SymbolTable -> [Chunk] -> SymbolTable
 resolveLabels table = foldr insertLabel table . concat . map (optmapChunk resolveLabel)
   where
@@ -137,7 +143,7 @@ resolveLabels table = foldr insertLabel table . concat . map (optmapChunk resolv
     resolveLabel _ _ = Nothing
 
 
--- Replace all symbolic values in a progrmm with their corresponding integer values
+-- |Replace all symbolic values in a progrmm with their corresponding integer values
 resolveReferences :: SymbolTable -> [Chunk] -> [Chunk]
 resolveReferences t = map elabChunk
   where
@@ -155,7 +161,7 @@ resolveReferences t = map elabChunk
                       _             -> v
 
 
--- Searches for relative branches where the distance to the target address is out of range
+-- |Searches for relative branches where the distance to the target address is out of range
 overlongBranches :: [Chunk] -> [String]
 overlongBranches = concat . map (optmapChunk check)
   where
@@ -167,11 +173,11 @@ overlongBranches = concat . map (optmapChunk check)
     check _ _ = Nothing
 
 
--- An assembled program chunk has a start address and a stream of byte values
+-- |An assembled program chunk has a start address and a stream of byte values
 data AsmChunk = AsmChunk Int [Word8] deriving (Eq,Show)
 
 
--- Assemble a program
+-- |Assemble a program
 assemble :: [Chunk] -> [AsmChunk]
 assemble = map assemble'
   where
@@ -187,7 +193,7 @@ assemble = map assemble'
     encodeValue _ _ = []
 
 
--- Check for overlaps between adjacent chunks
+-- |Check for overlaps between adjacent chunks
 overlappingParts :: [AsmChunk] -> [String]
 overlappingParts = fst . foldr check ([], maxBound::Int)
   where
@@ -199,7 +205,7 @@ overlappingParts = fst . foldr check ([], maxBound::Int)
       )
 
 
--- Merge assembled chunks into a single chunk
+-- |Merge assembled chunks into a single chunk
 merge :: [AsmChunk] -> AsmChunk
 merge = foldl1' merge'
   where

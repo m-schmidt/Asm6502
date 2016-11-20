@@ -1,3 +1,4 @@
+-- |Module to write assembled programs in various file formats
 module AsmOutput where
 
 import Arch6502
@@ -7,13 +8,13 @@ import qualified Data.ByteString as B (writeFile, pack)
 import Text.Printf
 
 
--- Write assembled program in PRG output format
+-- |Write assembled program in PRG output format
 writePRG :: AsmChunk -> FilePath -> IO ()
 writePRG (AsmChunk address bytes) filename =
   B.writeFile filename $ B.pack $ (encodeOperand 2 address) ++ bytes
 
 
--- Write assembled program in HEX output format
+-- |Write assembled program in HEX output format
 writeHEX :: AsmChunk -> FilePath -> IO ()
 writeHEX (AsmChunk address bytes) filename =
   writeFile filename $ unlines $ hexDump address bytes
@@ -23,7 +24,7 @@ writeHEX (AsmChunk address bytes) filename =
     hexLine a bs = (printf "%04x:" a) ++ (concat $ map (printf " %02x") bs)
 
 
--- Write parsed assembler source program to a file
+-- |Write parsed (and reduced) assembler source program to a file
 writeParsed :: [Chunk] -> FilePath -> IO ()
 writeParsed chunks filename = writeFile filename . unlines . map writeChunk $ chunks
   where

@@ -1,102 +1,103 @@
+-- | Module definining the 6502 architecture.
 module Arch6502 where
 
 import Data.Bits
 import Data.Word
 
 
--- 6502 Mnemonics
-data Mnemonic = ADC   -- add with carry
-              | AND   -- and (with accumulator)
-              | ASL   -- arithmetic shift left
-              | BCC   -- branch on carry clear
-              | BCS   -- branch on carry set
-              | BEQ   -- branch on equal
-              | BIT   -- bit test
-              | BMI   -- branch on minus
-              | BNE   -- branch on not equal
-              | BPL   -- branch on plus
-              | BRK   -- interrupt
-              | BVC   -- branch on overflow clear
-              | BVS   -- branch on overflow set
-              | CLC   -- clear carry
-              | CLD   -- clear decimal
-              | CLI   -- clear interrupt disable
-              | CLV   -- clear overflow
-              | CMP   -- compare (with accumulator)
-              | CPX   -- compare with X
-              | CPY   -- compare with Y
-              | DEC   -- decrement
-              | DEX   -- decrement X
-              | DEY   -- decrement Y
-              | EOR   -- exclusive or (with accumulator)
-              | INC   -- increment
-              | INX   -- increment X
-              | INY   -- increment Y
-              | JMP   -- jump
-              | JSR   -- jump subroutine
-              | LDA   -- load accumulator
-              | LDX   -- load X
-              | LDY   -- load Y
-              | LSR   -- logical shift right
-              | NOP   -- no operation
-              | ORA   -- or with accumulator
-              | PHA   -- push accumulator
-              | PHP   -- push processor status
-              | PLA   -- pull accumulator
-              | PLP   -- pull processor status
-              | ROL   -- rotate left
-              | ROR   -- rotate right
-              | RTI   -- return from interrupt
-              | RTS   -- return from subroutine
-              | SBC   -- subtract with carry
-              | SEC   -- set carry
-              | SED   -- set decimal
-              | SEI   -- set interrupt disable
-              | STA   -- store accumulator
-              | STX   -- store X
-              | STY   -- store Y
-              | TAX   -- transfer accumulator to X
-              | TAY   -- transfer accumulator to Y
-              | TSX   -- transfer stack pointer to X
-              | TXA   -- transfer X to accumulator
-              | TXS   -- transfer X to stack pointer
-              | TYA   -- transfer Y to accumulator
+-- |All supported 6502 Mnemonics
+data Mnemonic = ADC   -- ^ Add with carry
+              | AND   -- ^ And (with accumulator)
+              | ASL   -- ^ Arithmetic shift left
+              | BCC   -- ^ Branch on carry clear
+              | BCS   -- ^ Branch on carry set
+              | BEQ   -- ^ Branch on equal
+              | BIT   -- ^ Bit test
+              | BMI   -- ^ Branch on minus
+              | BNE   -- ^ Branch on not equal
+              | BPL   -- ^ Branch on plus
+              | BRK   -- ^ Interrupt
+              | BVC   -- ^ Branch on overflow clear
+              | BVS   -- ^ Branch on overflow set
+              | CLC   -- ^ Clear carry
+              | CLD   -- ^ Clear decimal
+              | CLI   -- ^ Clear interrupt disable
+              | CLV   -- ^ Clear overflow
+              | CMP   -- ^ Compare (with accumulator)
+              | CPX   -- ^ Compare with X
+              | CPY   -- ^ Compare with Y
+              | DEC   -- ^ Decrement
+              | DEX   -- ^ Decrement X
+              | DEY   -- ^ Decrement Y
+              | EOR   -- ^ Exclusive or (with accumulator)
+              | INC   -- ^ Increment
+              | INX   -- ^ Increment X
+              | INY   -- ^ Increment Y
+              | JMP   -- ^ Jump
+              | JSR   -- ^ Jump subroutine
+              | LDA   -- ^ Load accumulator
+              | LDX   -- ^ Load X
+              | LDY   -- ^ Load Y
+              | LSR   -- ^ Logical shift right
+              | NOP   -- ^ No operation
+              | ORA   -- ^ Or with accumulator
+              | PHA   -- ^ Push accumulator
+              | PHP   -- ^ Push processor status
+              | PLA   -- ^ Pull accumulator
+              | PLP   -- ^ Pull processor status
+              | ROL   -- ^ Rotate left
+              | ROR   -- ^ Rotate right
+              | RTI   -- ^ Return from interrupt
+              | RTS   -- ^ Return from subroutine
+              | SBC   -- ^ Subtract with carry
+              | SEC   -- ^ Set carry
+              | SED   -- ^ Set decimal
+              | SEI   -- ^ Set interrupt disable
+              | STA   -- ^ Store accumulator
+              | STX   -- ^ Store X
+              | STY   -- ^ Store Y
+              | TAX   -- ^ Transfer accumulator to X
+              | TAY   -- ^ Transfer accumulator to Y
+              | TSX   -- ^ Transfer stack pointer to X
+              | TXA   -- ^ Transfer X to accumulator
+              | TXS   -- ^ Transfer X to stack pointer
+              | TYA   -- ^ Transfer Y to accumulator
               deriving (Eq,Enum,Bounded,Show,Read)
 
 
--- List of all 6502 Mnemonics
+-- |List of all 6502 Mnemonics
 allMnemonics :: [Mnemonic]
 allMnemonics = [minBound..maxBound]
 
 
--- Predicate for relative branch instructions
+-- |Predicate to filter relative branch instructions
 isBranch :: Mnemonic -> Bool
 isBranch m = opCode m Relative /= Nothing
 
 
--- Predicate for rotate and shift instructions
+-- |Predicate to filter rotate and shift instructions
 isShiftRotate :: Mnemonic -> Bool
 isShiftRotate m = opCode m Accumulator /= Nothing
 
 
--- 6502 Addressing Modes
-data AddressingMode = Absolute          -- $A5B6
-                    | AbsoluteX         -- $A5B6,X
-                    | AbsoluteY         -- $A5B6,Y
-                    | Accumulator       -- A
-                    | Immediate         -- #$A5
-                    | Implied           -- (no operand)
-                    | IndexedIndirect   -- ($A5,X)
-                    | Indirect          -- ($A5)
-                    | IndirectIndexed   -- ($A5),Y
-                    | Relative          -- (specified operand must be converted into a relative offset)
-                    | ZeroPage          -- $A5
-                    | ZeroPageX         -- $A5,X
-                    | ZeroPageY         -- $A5,Y
+-- |6502 Addressing Modes
+data AddressingMode = Absolute          -- ^ Absolute addressing: $A5B6
+                    | AbsoluteX         -- ^ Absolute Indexed with X: $A5B6,X
+                    | AbsoluteY         -- ^ Absolute Indexed with X: $A5B6,Y
+                    | Accumulator       -- ^ Accumulator: A
+                    | Immediate         -- ^ Immediate: #$A5
+                    | Implied           -- ^ No operand is specified
+                    | IndexedIndirect   -- ^ Indexed Indirect: ($A5,X)
+                    | Indirect          -- ^ Indirect ($A5)
+                    | IndirectIndexed   -- ^ Indirect Indexed: ($A5),Y
+                    | Relative          -- ^ Specified operand must be converted into a relative offset (used for branches)
+                    | ZeroPage          -- ^ Zero Page: $A5
+                    | ZeroPageX         -- ^ Zero Page Indexed with X: $A5,X
+                    | ZeroPageY         -- ^ Zero Page Indexed with Y: $A5,Y
                     deriving (Eq,Enum,Show)
 
 
--- Encode a mnemonic with an operand of a specific addressing mode into a sequence of bytes
+-- |Encode a mnemonic with an operand of a specific addressing mode into a sequence of bytes
 encodeInstruction :: Int -> Mnemonic -> AddressingMode -> Int -> Maybe [Word8]
 encodeInstruction addr mnemonic mode value =
   -- encoding is the instruction opcode followed by a stream of bytes for the operand
@@ -109,13 +110,13 @@ encodeInstruction addr mnemonic mode value =
     value' = if mode == Relative then value - addr - 2 else value
 
 
--- Encode an integer value into a little endian sequence of bytes
+-- |Encode an integer value into a little endian sequence of bytes
 encodeOperand :: Int -> Int -> [Word8]
 encodeOperand 0 _ = []
 encodeOperand n v = (fromIntegral $ v .&. 255) : encodeOperand (n-1) (v `shift` (-8))
 
 
--- Returns the number of bytes needed to encode an addressing mode
+-- |Returns the number of bytes needed to encode an addressing mode
 operandLength :: AddressingMode -> Int
 operandLength mode = case mode of
   Accumulator -> 0
@@ -126,7 +127,7 @@ operandLength mode = case mode of
   _           -> 1
 
 
--- Returns the opcode for a combination of instruction mnemonic and addressing mode
+-- |Returns the opcode for a combination of instruction mnemonic and addressing mode
 opCode :: Mnemonic -> AddressingMode -> Maybe Word8
 opCode mnemonic mode = opcode mode mnemonic
   where
@@ -336,6 +337,6 @@ opCode mnemonic mode = opcode mode mnemonic
       _   -> Nothing
 
 
--- Check whether a combination of mnemonic and addressing mode is illegal
+-- |Check whether a combination of mnemonic and addressing mode is illegal
 isIllegalInstruction :: Mnemonic -> AddressingMode -> Bool
 isIllegalInstruction mnemonic mode = opCode mnemonic mode == Nothing
