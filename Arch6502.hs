@@ -339,4 +339,4 @@ opCode mnemonic mode = opcode mode mnemonic
 
 -- |Check whether a combination of mnemonic and addressing mode is illegal
 isIllegalInstruction :: Mnemonic -> AddressingMode -> Bool
-isIllegalInstruction mnemonic mode = opCode mnemonic mode == Nothing
+isIllegalInstruction = ((Nothing ==) . ) . opCode

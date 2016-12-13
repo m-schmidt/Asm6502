@@ -143,7 +143,7 @@ resolveLabels table = foldr insertLabel table . concat . map (optmapChunk resolv
     resolveLabel _ _ = Nothing
 
 
--- |Replace all symbolic values in a progrmm with their corresponding integer values
+-- |Replace all symbolic values in a program with their corresponding integer values
 resolveReferences :: SymbolTable -> [Chunk] -> [Chunk]
 resolveReferences t = map elabChunk
   where
@@ -157,8 +157,11 @@ resolveReferences t = map elabChunk
     elabValue v = case v of
       Constant _ -> v
       Symbol s o -> case Map.lookup s t of
-                      Just (Just c) -> Constant (c+o)
+                      Just (Just c) -> Constant $ toWord (c+o)
                       _             -> v
+
+    toWord i | i < 0     = toWord $ i+65536
+             | otherwise = i `mod` 65536
 
 
 -- |Searches for relative branches where the distance to the target address is out of range
