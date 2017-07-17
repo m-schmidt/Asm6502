@@ -13,6 +13,12 @@ cabal-version:         >=1.10
 
 Executable asm6502
   main-is:             Main.hs
+  other-modules:       Arch6502
+                     , AsmOutput
+                     , AsmParser
+                     , Assembler
+                     , Commandline
+                     , Error
   build-depends:       base >=4.9 && <4.10
                      , bytestring >=0.10 && <0.11
                      , filepath >=1.4 && <1.5
