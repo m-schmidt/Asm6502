@@ -70,7 +70,7 @@ options =
   , Option ['o']
       ["output"]
       (ReqArg (\s opts -> opts { optOutput = s }) "FILE")
-      ("Set output file. Defaults to '<input>.prg' or '<input>.hex'")
+      ("Set output file. Defaults to '<input>.prg' or '<input>.hex'.")
   , Option ['f']
       ["format"]
       (ReqArg (\s opts -> opts { optFormatRaw = s }) "FORMAT")
