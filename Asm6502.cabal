@@ -2,7 +2,7 @@ name:                  Asm6502
 version:               1.0.0.0
 synopsis:              Assembler for the MOS Technology 6502
 homepage:              https://github.com/m-schmidt/Asm6502
-license:               MIT
+license:               BSD3
 license-file:          LICENSE
 author:                Michael Schmidt
 maintainer:            github@mschmidt.me
