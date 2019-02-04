@@ -2,6 +2,11 @@
 
 Asm6502 is an assembler for the MOS Technology 6502. The generated `PRG` output files can be loaded into an C64 emulator.
 
+## Build Instructions
+
+- Clone the repository and within the project directory type:
+
+      $ stack build --copy-bins
 
 ## Commandline Syntax
 
