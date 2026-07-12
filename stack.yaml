@@ -1,6 +1,8 @@
-resolver: lts-13.21
+resolver: lts-21.25 # GHC 9.4.8
 packages:
 - .
 extra-deps: []
+  
+
 flags: {}
 extra-package-dbs: []
