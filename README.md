@@ -4,9 +4,23 @@ Asm6502 is an assembler for the MOS Technology 6502. The generated `PRG` output 
 
 ## Build Instructions
 
-- Clone the repository and within the project directory type:
+Clone the repository and within the project directory type:
 
-      $ stack build --copy-bins
+		$ stack build --copy-bins
+	
+
+## Installing
+Tested on MacOSX with Tahoe 26.x. Using `homebrew` to install Haskell.
+
+		$ brew install stack
+
+Two errors surfaced:
+
+- No setup information found for `ghc-8.6.5`
+- `bytestring` didn't match when a newer ghc was set
+
+Patches made in the project's `yaml` and `cabal` files.
+
 
 ## Commandline Syntax
 
