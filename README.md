@@ -7,7 +7,10 @@ Asm6502 is an assembler for the MOS Technology 6502. The generated `PRG` output 
 Clone the repository and within the project directory type:
 
 		$ stack build --copy-bins
-	
+
+Some more control on where the output will be installed:
+
+      $ stack build --copy-bins --local-bin-path .	
 
 ## Installing
 Tested on MacOSX with Tahoe 26.x. Using `homebrew` to install Haskell.
